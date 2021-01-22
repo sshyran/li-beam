@@ -19,6 +19,7 @@ package org.apache.beam.runners.spark;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import org.apache.beam.runners.core.construction.SplittableParDo;
 import org.apache.beam.runners.spark.translation.EvaluationContext;
 import org.apache.beam.runners.spark.translation.SparkPipelineTranslator;
 import org.apache.beam.runners.spark.translation.TransformTranslator;
@@ -76,6 +77,16 @@ public final class SparkRunnerDebugger extends PipelineRunner<SparkPipelineResul
 
   @Override
   public SparkPipelineResult run(Pipeline pipeline) {
+    boolean isStreaming =
+        options.isStreaming() || options.as(TestSparkPipelineOptions.class).isForceStreaming();
+    // Default to using the primitive versions of Read.Bounded and Read.Unbounded if we are
+    // executing an unbounded pipeline or the user specifically requested it.
+    if (isStreaming
+        || ExperimentalOptions.hasExperiment(
+            pipeline.getOptions(), "beam_fn_api_use_deprecated_read")
+        || ExperimentalOptions.hasExperiment(pipeline.getOptions(), "use_deprecated_read")) {
+      SplittableParDo.convertReadBasedSplittableDoFnsToPrimitiveReads(pipeline);
+    }
     JavaSparkContext jsc = new JavaSparkContext("local[1]", "Debug_Pipeline");
     JavaStreamingContext jssc =
         new JavaStreamingContext(jsc, new org.apache.spark.streaming.Duration(1000));
