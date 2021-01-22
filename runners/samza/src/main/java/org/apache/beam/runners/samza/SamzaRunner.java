@@ -110,7 +110,7 @@ public class SamzaRunner extends PipelineRunner<SamzaPipelineResult> {
 
   @Override
   public SamzaPipelineResult run(Pipeline pipeline) {
-    SplittableParDo.convertReadBasedSplittableDoFnsToPrimitiveReadsIfNecessary(pipeline);
+    SplittableParDo.validateNoPrimitiveReads(pipeline);
     MetricsEnvironment.setMetricsSupported(true);
 
     if (LOG.isDebugEnabled()) {

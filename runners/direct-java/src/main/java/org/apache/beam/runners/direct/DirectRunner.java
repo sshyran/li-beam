@@ -184,7 +184,7 @@ public class DirectRunner extends PipelineRunner<DirectPipelineResult> {
 
       DisplayDataValidator.validatePipeline(pipeline);
       DisplayDataValidator.validateOptions(options);
-      SplittableParDo.convertReadBasedSplittableDoFnsToPrimitiveReadsIfNecessary(pipeline);
+      SplittableParDo.validateNoPrimitiveReads(pipeline);
 
       ExecutorService metricsPool =
           Executors.newCachedThreadPool(

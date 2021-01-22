@@ -88,8 +88,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /**
  * Tests DStream recovery from checkpoint.
@@ -99,7 +97,6 @@ import org.junit.runners.JUnit4;
  * asserted, along with {@link Metrics} values that are expected to resume from previous count and a
  * side-input that is expected to recover as well.
  */
-@RunWith(JUnit4.class)
 @SuppressWarnings({
   "rawtypes", // TODO(https://issues.apache.org/jira/browse/BEAM-10556)
   "nullness" // TODO(https://issues.apache.org/jira/browse/BEAM-10402)

@@ -50,11 +50,8 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import org.hamcrest.Matchers;
 import org.joda.time.Duration;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 /** Test {@link SparkRunnerDebugger} with different pipelines. */
-@RunWith(JUnit4.class)
 public class SparkRunnerDebuggerTest {
 
   @Test
@@ -81,7 +78,7 @@ public class SparkRunnerDebuggerTest {
         .apply(TextIO.write().to("!!PLACEHOLDER-OUTPUT-DIR!!").withNumShards(3).withSuffix(".txt"));
 
     final String expectedPipeline =
-        "_.<org.apache.beam.sdk.io.Read$Bounded>\n"
+        "sparkContext.<readFrom(org.apache.beam.sdk.transforms.Create$Values$CreateSource)>()\n"
             + "_.mapPartitions("
             + "new org.apache.beam.runners.spark.examples.WordCount$ExtractWordsFn())\n"
             + "_.mapPartitions(new org.apache.beam.sdk.transforms.Contextful())\n"

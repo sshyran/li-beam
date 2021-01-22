@@ -29,7 +29,6 @@ import java.util.Map;
 import org.apache.beam.runners.core.SystemReduceFn;
 import org.apache.beam.runners.core.construction.PTransformTranslation;
 import org.apache.beam.runners.core.construction.ParDoTranslation;
-import org.apache.beam.runners.core.construction.SplittableParDo;
 import org.apache.beam.runners.spark.SparkPipelineOptions;
 import org.apache.beam.runners.spark.coders.CoderHelpers;
 import org.apache.beam.runners.spark.io.SourceRDD;
@@ -43,6 +42,7 @@ import org.apache.beam.sdk.coders.CannotProvideCoderException;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.IterableCoder;
 import org.apache.beam.sdk.coders.KvCoder;
+import org.apache.beam.sdk.io.Read;
 import org.apache.beam.sdk.transforms.Combine;
 import org.apache.beam.sdk.transforms.CombineWithContext;
 import org.apache.beam.sdk.transforms.DoFn;
@@ -622,11 +622,10 @@ public final class TransformTranslator {
     };
   }
 
-  private static <T> TransformEvaluator<SplittableParDo.PrimitiveBoundedRead<T>> readBounded() {
-    return new TransformEvaluator<SplittableParDo.PrimitiveBoundedRead<T>>() {
+  private static <T> TransformEvaluator<Read.Bounded<T>> readBounded() {
+    return new TransformEvaluator<Read.Bounded<T>>() {
       @Override
-      public void evaluate(
-          SplittableParDo.PrimitiveBoundedRead<T> transform, EvaluationContext context) {
+      public void evaluate(Read.Bounded<T> transform, EvaluationContext context) {
         String stepName = context.getCurrentTransform().getFullName();
         final JavaSparkContext jsc = context.getSparkContext();
         // create an RDD from a BoundedSource.

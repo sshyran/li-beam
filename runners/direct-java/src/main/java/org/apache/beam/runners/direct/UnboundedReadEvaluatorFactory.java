@@ -26,8 +26,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import org.apache.beam.runners.core.construction.ReadTranslation;
-import org.apache.beam.runners.core.construction.SplittableParDo;
 import org.apache.beam.runners.direct.UnboundedReadDeduplicator.NeverDeduplicator;
+import org.apache.beam.sdk.io.Read;
+import org.apache.beam.sdk.io.Read.Unbounded;
 import org.apache.beam.sdk.io.UnboundedSource;
 import org.apache.beam.sdk.io.UnboundedSource.CheckpointMark;
 import org.apache.beam.sdk.io.UnboundedSource.UnboundedReader;
@@ -47,8 +48,7 @@ import org.joda.time.Instant;
 
 /**
  * A {@link TransformEvaluatorFactory} that produces {@link TransformEvaluator TransformEvaluators}
- * for the {@link PrimitiveUnboundedRead SplittableParDo.PrimitiveUnboundedRead} primitive {@link
- * PTransform}.
+ * for the {@link Unbounded Read.Unbounded} primitive {@link PTransform}.
  */
 @SuppressWarnings({
   "rawtypes", // TODO(https://issues.apache.org/jira/browse/BEAM-10556)
@@ -82,9 +82,7 @@ class UnboundedReadEvaluatorFactory implements TransformEvaluatorFactory {
   }
 
   private <OutputT> TransformEvaluator<?> createEvaluator(
-      AppliedPTransform<
-              PBegin, PCollection<OutputT>, SplittableParDo.PrimitiveUnboundedRead<OutputT>>
-          application) {
+      AppliedPTransform<PBegin, PCollection<OutputT>, Read.Unbounded<OutputT>> application) {
     return new UnboundedReadEvaluator<>(application, evaluationContext, options, readerReuseChance);
   }
 

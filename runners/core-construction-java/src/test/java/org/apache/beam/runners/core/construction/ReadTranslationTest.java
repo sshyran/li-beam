@@ -69,8 +69,7 @@ public class ReadTranslationTest {
     // TODO: Split into two tests.
     assumeThat(source, instanceOf(BoundedSource.class));
     BoundedSource<?> boundedSource = (BoundedSource<?>) this.source;
-    SplittableParDo.PrimitiveBoundedRead<?> boundedRead =
-        new SplittableParDo.PrimitiveBoundedRead<>(Read.from(boundedSource));
+    Read.Bounded<?> boundedRead = Read.from(boundedSource);
     SdkComponents components = SdkComponents.create();
     components.registerEnvironment(Environments.createDockerEnvironment("java"));
     ReadPayload payload = ReadTranslation.toProto(boundedRead, components);
@@ -83,8 +82,7 @@ public class ReadTranslationTest {
   public void testToFromProtoUnbounded() throws Exception {
     assumeThat(source, instanceOf(UnboundedSource.class));
     UnboundedSource<?, ?> unboundedSource = (UnboundedSource<?, ?>) this.source;
-    SplittableParDo.PrimitiveUnboundedRead<?> unboundedRead =
-        new SplittableParDo.PrimitiveUnboundedRead<>(Read.from(unboundedSource));
+    Read.Unbounded<?> unboundedRead = Read.from(unboundedSource);
     SdkComponents components = SdkComponents.create();
     // No environment set for unbounded sources
     ReadPayload payload = ReadTranslation.toProto(unboundedRead, components);

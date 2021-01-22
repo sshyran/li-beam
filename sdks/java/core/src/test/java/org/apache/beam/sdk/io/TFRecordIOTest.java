@@ -23,7 +23,6 @@ import static org.apache.beam.sdk.io.Compression.GZIP;
 import static org.apache.beam.sdk.io.Compression.UNCOMPRESSED;
 import static org.apache.beam.sdk.transforms.display.DisplayDataMatchers.hasDisplayItem;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.core.Is.is;
@@ -126,12 +125,14 @@ public class TFRecordIOTest {
   public void testReadNamed() {
     readPipeline.enableAbandonedNodeEnforcement(false);
 
-    assertThat(
-        readPipeline.apply(TFRecordIO.read().from("foo.*").withoutValidation()).getName(),
-        startsWith("TFRecordIO.Read/Read"));
-    assertThat(
-        readPipeline.apply("MyRead", TFRecordIO.read().from("foo.*").withoutValidation()).getName(),
-        startsWith("MyRead/Read"));
+    assertEquals(
+        "TFRecordIO.Read/Read.out",
+        readPipeline.apply(TFRecordIO.read().from("foo.*").withoutValidation()).getName());
+    assertEquals(
+        "MyRead/Read.out",
+        readPipeline
+            .apply("MyRead", TFRecordIO.read().from("foo.*").withoutValidation())
+            .getName());
   }
 
   @Test

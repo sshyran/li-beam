@@ -31,7 +31,6 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -87,14 +86,12 @@ import org.joda.time.Duration;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
-import org.junit.experimental.runners.Enclosed;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.junit.runners.Parameterized;
 
 /** Tests for {@link TextIO.Read}. */
-@RunWith(Enclosed.class)
 @SuppressWarnings({
   "nullness" // TODO(https://issues.apache.org/jira/browse/BEAM-10402)
 })
@@ -480,10 +477,9 @@ public class TextIOReadTest {
       File emptyFile = tempFolder.newFile();
       p.enableAbandonedNodeEnforcement(false);
 
-      assertThat(p.apply(TextIO.read().from("somefile")).getName(), startsWith("TextIO.Read/Read"));
-      assertThat(
-          p.apply("MyRead", TextIO.read().from(emptyFile.getPath())).getName(),
-          startsWith("MyRead/Read"));
+      assertEquals("TextIO.Read/Read.out", p.apply(TextIO.read().from("somefile")).getName());
+      assertEquals(
+          "MyRead/Read.out", p.apply("MyRead", TextIO.read().from(emptyFile.getPath())).getName());
     }
 
     @Test
