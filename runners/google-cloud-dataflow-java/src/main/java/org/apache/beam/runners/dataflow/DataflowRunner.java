@@ -72,7 +72,6 @@ import org.apache.beam.runners.core.construction.RehydratedComponents;
 import org.apache.beam.runners.core.construction.ReplacementOutputs;
 import org.apache.beam.runners.core.construction.SdkComponents;
 import org.apache.beam.runners.core.construction.SingleInputOutputOverrideFactory;
-import org.apache.beam.runners.core.construction.SplittableParDo;
 import org.apache.beam.runners.core.construction.SplittableParDoNaiveBounded;
 import org.apache.beam.runners.core.construction.UnboundedReadFromBoundedSource;
 import org.apache.beam.runners.core.construction.UnconsumedReads;
@@ -114,6 +113,7 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessageWithAttributesCoder;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubMessages;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubUnboundedSink;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubUnboundedSource;
+import org.apache.beam.sdk.options.ExperimentalOptions;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsValidator;
 import org.apache.beam.sdk.options.ValueProvider.NestedValueProvider;
@@ -514,7 +514,8 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
               new GroupIntoBatchesOverride.StreamingGroupIntoBatchesWithShardedKeyOverrideFactory(
                   this)));
 
-      if (!fnApiEnabled) {
+      if (!fnApiEnabled
+          || ExperimentalOptions.hasExperiment(options, "beam_fn_api_use_deprecated_read")) {
         overridesBuilder
             .add(
                 // Streaming Bounded Read is implemented in terms of Streaming Unbounded Read, and
@@ -537,9 +538,6 @@ public class DataflowRunner extends PipelineRunner<DataflowPipelineJob> {
       // Dataflow Streaming runner overrides the SPLITTABLE_PROCESS_KEYED transform
       // natively in the Dataflow service.
     } else {
-      if (!fnApiEnabled) {
-        overridesBuilder.add(SplittableParDo.PRIMITIVE_BOUNDED_READ_OVERRIDE);
-      }
       overridesBuilder
           // Replace GroupIntoBatches before the state/timer replacements below since
           // GroupIntoBatches internally uses a stateful DoFn.
