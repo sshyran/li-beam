@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.beam.runners.core.construction.PTransformTranslation;
+import org.apache.beam.runners.core.construction.SplittableParDo;
 import org.apache.beam.runners.flink.FlinkStreamingTransformTranslators.UnboundedSourceWrapperNoValueWithRecordId;
 import org.apache.beam.runners.flink.streaming.StreamSources;
 import org.apache.beam.runners.flink.translation.wrappers.streaming.io.UnboundedSourceWrapper;
@@ -64,7 +65,9 @@ public class FlinkStreamingTransformTranslatorsTest {
     final int maxParallelism = 6;
     final int parallelism = 2;
 
-    Read.Bounded transform = Read.from(new TestBoundedSource(maxParallelism));
+    SplittableParDo.PrimitiveBoundedRead<String> transform =
+        new SplittableParDo.PrimitiveBoundedRead<>(
+            Read.from(new TestBoundedSource(maxParallelism)));
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.setParallelism(parallelism);
     env.setMaxParallelism(maxParallelism);
@@ -84,7 +87,8 @@ public class FlinkStreamingTransformTranslatorsTest {
 
     final int parallelism = 2;
 
-    Read.Bounded transform = Read.from(new TestBoundedSource(parallelism));
+    SplittableParDo.PrimitiveBoundedRead<String> transform =
+        new SplittableParDo.PrimitiveBoundedRead<>(Read.from(new TestBoundedSource(parallelism)));
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.setParallelism(parallelism);
 
@@ -104,7 +108,8 @@ public class FlinkStreamingTransformTranslatorsTest {
     final int maxParallelism = 6;
     final int parallelism = 2;
 
-    Read.Unbounded transform = Read.from(new TestUnboundedSource());
+    SplittableParDo.PrimitiveUnboundedRead<String> transform =
+        new SplittableParDo.PrimitiveUnboundedRead<>(Read.from(new TestUnboundedSource()));
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.setParallelism(parallelism);
     env.setMaxParallelism(maxParallelism);
@@ -126,7 +131,8 @@ public class FlinkStreamingTransformTranslatorsTest {
 
     final int parallelism = 2;
 
-    Read.Unbounded transform = Read.from(new TestUnboundedSource());
+    SplittableParDo.PrimitiveUnboundedRead<String> transform =
+        new SplittableParDo.PrimitiveUnboundedRead<>(Read.from(new TestUnboundedSource()));
     StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
     env.setParallelism(parallelism);
 
