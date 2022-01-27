@@ -186,7 +186,7 @@ public class ParDoTranslation {
               .setUrn(PAR_DO_TRANSFORM_URN)
               .setPayload(payload.toByteString())
               .build());
-      builder.setEnvironmentId(components.getEnvironmentIdFor(appliedParDo.getResourceHints()));
+      builder.setEnvironmentId(components.getEnvironmentIdFor(appliedParDo));
 
       return builder.build();
     }

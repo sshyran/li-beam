@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.beam.model.pipeline.v1.Endpoints;
 import org.apache.beam.model.pipeline.v1.RunnerApi;
 import org.apache.beam.model.pipeline.v1.RunnerApi.Components;
 import org.apache.beam.model.pipeline.v1.RunnerApi.Environment;
@@ -37,6 +38,7 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PortablePipelineOptions;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.resourcehints.ResourceHints;
 import org.apache.beam.sdk.util.NameUtils;
 import org.apache.beam.sdk.values.PCollection;
@@ -314,6 +316,61 @@ public class SdkComponents {
     }
     return environmentId;
   }
+
+  private boolean isPlatformParDo(ParDo.MultiOutput<?, ?> pardo) {
+    String path = pardo.getFn().getClass().getProtectionDomain().getCodeSource().getLocation().getPath();
+    return path.contains("beam-runner") || path.contains("beam-sdks");
+  }
+
+  public String getEnvironmentIdFor(AppliedPTransform<?, ?, ParDo.MultiOutput<?, ?>> appliedPTransform) {
+    ResourceHints resourceHints = appliedPTransform.getResourceHints();
+
+    if (isPlatformParDo(appliedPTransform.getTransform())) {
+      /// beam:env:external:v1
+      String name = "beam:env:external:platform";
+      if (!componentsBuilder.getEnvironmentsMap().containsKey(name)) {
+        Environment env =
+            Environment.newBuilder()
+                .setUrn(BeamUrns.getUrn(RunnerApi.StandardEnvironments.Environments.EXTERNAL))
+                .setPayload(
+                    RunnerApi.ExternalPayload.newBuilder()
+                        .setEndpoint(
+                            Endpoints.ApiServiceDescriptor.newBuilder().setUrl("localhost:12345").build())
+                        .build()
+                        .toByteString())
+                .build();
+
+        environmentIds.put(env, name);
+        componentsBuilder.putEnvironments(name, env);
+      }
+
+      return name;
+    }
+
+    if (!environmentIdsByResourceHints.containsKey(resourceHints)) {
+      String baseEnvironmentId = getOnlyEnvironmentId();
+
+      if (resourceHints.hints().size() == 0) {
+        environmentIdsByResourceHints.put(resourceHints, baseEnvironmentId);
+      } else {
+        Environment env =
+            componentsBuilder
+                .getEnvironmentsMap()
+                .get(baseEnvironmentId)
+                .toBuilder()
+                .putAllResourceHints(
+                    Maps.transformValues(
+                        resourceHints.hints(), hint -> ByteString.copyFrom(hint.toBytes())))
+                .build();
+        String name = uniqify(env.getUrn(), environmentIds.values());
+        environmentIds.put(env, name);
+        componentsBuilder.putEnvironments(name, env);
+        environmentIdsByResourceHints.put(resourceHints, name);
+      }
+    }
+    return environmentIdsByResourceHints.get(resourceHints);
+  }
+
 
   public String getEnvironmentIdFor(ResourceHints resourceHints) {
     if (!environmentIdsByResourceHints.containsKey(resourceHints)) {
